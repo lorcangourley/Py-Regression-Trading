@@ -1,0 +1,114 @@
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import recall_score
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import mean_squared_error
+
+# 1. File Import
+
+file = pd.read_csv(r'Investments_ Equity Portfolio and Pricing - PCG.csv')
+print(file.head(2))
+
+# File copy
+
+file_cleaned = file.copy()
+
+# 2. Formatting DateTime
+
+file_cleaned[["Date", "Close"]]
+file_cleaned["PCG"] = file_cleaned["Close"]
+file_cleaned["Date"] = file_cleaned["Date"].str.replace(' 16:00:00', '')
+file_cleaned["Date"] = file_cleaned["Date"].str.replace(' 13:00:00', '')
+file_cleaned["Date"] = pd.to_datetime(file_cleaned["Date"], format='%d/%m/%Y')
+
+# 3. Create Lag
+
+file_cleaned['PCG.Lag'] = file_cleaned['PCG'].shift(1)
+
+my_file = file_cleaned[["Date",'PCG' , "PCG.Lag"]].sort_values('Date', ascending= True)
+print(my_file.head(3))
+
+print(my_file.plot(kind= 'line', x= 'Date', y= 'PCG'))
+
+# 4. Asset Momentum
+
+my_file['2MA'] = my_file['PCG.Lag'].rolling(window = 2).mean()
+my_file['5MA'] = my_file['PCG.Lag'].rolling(window = 5).mean()
+my_file['14MA'] = my_file['PCG.Lag'].rolling(window = 14).mean()
+my_file['30MA'] = my_file['PCG.Lag'].rolling(window = 30).mean()
+
+# 5. Regression
+
+Y = my_file['PCG'][60:]
+X = my_file[['2MA',
+ '5MA',
+ '14MA',
+ '30MA']][60:]
+X = sm.add_constant(X)
+
+ks = sm.OLS(Y, X)
+ks_res =ks.fit()
+ks_res.summary()
+
+import matplotlib.pyplot as plt
+data = my_file[60 :].copy(deep=True)
+print(data.tail(2))
+
+x_train, X_test, y_train, y_test = train_test_split(
+   data[["2MA", "5MA", "14MA"]],  # Independent variables
+   data["PCG"],  # Dependent variable
+   test_size=0.4,  # 40% test set size
+)
+
+clf = GridSearchCV(
+   RandomForestRegressor(),
+   {
+       "criterion": ["mse", "mae"],
+       "max_depth": [50 + i * 10 for i in range(10)],
+       "oob_score": [True, False],
+       "max_features": ["sqrt", None],
+       "min_impurity_decrease": [0.00, 0.001],
+   },
+    scoring="neg_mean_squared_error",  # Metric to evaluate performance
+    cv=5,  # 5-fold cross-validation
+    n_jobs=-1,  # Use all processors
+)
+
+# 6. Train
+
+clf.fit(x_train, y_train)
+
+
+# Print best parameters and evaluate
+print("Best parameters:", clf.best_params_)
+print("Best score:", clf.best_score_)
+
+# Predict and evaluate
+y_pred = clf.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+print("Mean Squared Error:", mse)
+
+# 7. Short Term Trading
+
+# Extract the last values of 2MA, 5MA, 14MA, and 30MA
+last_values = data[["2MA", "5MA", "14MA"]].iloc[-3].values.reshape(1, -1)
+
+# Extract the last actual value of 'PCG Close'
+last_PCG_close = data["PCG"].iloc[-3]
+
+# Ensure 'best_model' is obtained from GridSearchCV
+best_model = clf.best_estimator_
+
+# Predict using the last values
+predicted_close = best_model.predict(last_values)
+
+# Compare the predicted value with the last actual value
+print("Prediction for Next PCG Close:", predicted_close)
+print("Last PCG Close:", last_PCG_close)
+
+# Next PCG close is the predicted next day
+# Last PCG is the last close date in file

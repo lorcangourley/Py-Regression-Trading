@@ -1,0 +1,74 @@
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+
+# Load and clean data
+file = pd.read_csv(r'C:\Users\grabc\Documents\Lorcan\portfolio\Tesla Prices.csv')
+
+file_cleaned = file.copy()
+file_cleaned["Date"] = file_cleaned["Date"].str.replace(' 16:00:00', '').str.replace(' 13:00:00', '').str.replace(' 13:05:00', '')
+file_cleaned["Date"] = pd.to_datetime(file_cleaned["Date"], format='%d/%m/%Y')
+
+# Create Lag and Moving Averages
+file_cleaned['Tesla.Lag'] = file_cleaned['Close'].shift(1)
+file_cleaned['2MA'] = file_cleaned['Tesla.Lag'].rolling(window=2).mean()
+file_cleaned['5MA'] = file_cleaned['Tesla.Lag'].rolling(window=5).mean()
+file_cleaned['14MA'] = file_cleaned['Tesla.Lag'].rolling(window=14).mean()
+file_cleaned['30MA'] = file_cleaned['Tesla.Lag'].rolling(window=30).mean()
+
+# Remove NaN values
+data = file_cleaned.dropna().copy()
+
+# Define Initial Portfolio
+initial_cash = 10000
+cash = initial_cash
+shares = 0
+portfolio_values = []
+
+# Backtesting Loop
+for i in range(60, len(data) - 1):  # Start at index 60 to ensure MAs exist
+    train_data = data.iloc[:i]  # Use past data up to index i
+    test_data = data.iloc[i + 1]  # Next-day prediction
+
+    # Train Model
+    X_train = train_data[["2MA", "5MA", "14MA"]]
+    Y_train = train_data["Tesla.Lag"]
+    X_test = test_data[["2MA", "5MA", "14MA"]].values.reshape(1, -1)
+
+    model = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42)
+    model.fit(X_train, Y_train)
+
+    # Predict Next Day Close Price
+    predicted_close = model.predict(X_test)[0]
+    actual_close = test_data["Tesla.Lag"]
+
+    # Trading Decision
+    if predicted_close > actual_close and cash > 0:  # Buy condition
+        shares = cash / actual_close
+        cash = 0
+    elif predicted_close < actual_close and shares > 0:  # Sell condition
+        cash = shares * actual_close
+        shares = 0
+
+    # Calculate Portfolio Value
+    portfolio_value = cash + (shares * actual_close)
+    portfolio_values.append(portfolio_value)
+
+# Final Portfolio Performance
+final_value = portfolio_values[-1]
+print(f"Initial Cash: ${initial_cash}")
+print(f"Final Portfolio Value: ${final_value:.2f}")
+print(f"Total Return: {((final_value - initial_cash) / initial_cash) * 100:.2f}%")
+
+# Plot Portfolio Growth
+plt.figure(figsize=(10,5))
+plt.plot(portfolio_values, label="Portfolio Value")
+plt.xlabel("Days")
+plt.ylabel("Portfolio Value ($)")
+plt.title("Backtesting Results")
+plt.legend()
+plt.show()

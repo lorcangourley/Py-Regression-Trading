@@ -5,7 +5,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_squared_error
 
 # Load and clean data
-file = pd.read_csv(r'C:\Users\grabc\Documents\Lorcan\portfolio\Tesla Prices.csv')
+file = pd.read_csv(r'Tesla Prices.csv')
 
 file_cleaned = file.copy()
 file_cleaned["Date"] = file_cleaned["Date"].str.replace(' 16:00:00', '').str.replace(' 13:00:00', '').str.replace(' 13:05:00', '')

@@ -1,6 +1,6 @@
 # Stock Price Prediction with Market Momentum & Sentiment Indicators
 
-This project aims to predict the closing prices of stocks using market momentum, technical indicators, and sentiment analysis. The model leverages machine learning algorithms to analyze historical market data along with sentiment data to predict future closing prices.
+Currently working on this project for a university assignment, where I aim to predict long and short trades using market momentum, technical indicators, and sentiment analysis. The model leverages machine learning algorithms to analyze historical market data along with sentiment data to predict future closing prices.
 
 ### Features
 - **Market Momentum Indicators**: Various indicators to capture the momentum of the market, such as moving averages more to be added

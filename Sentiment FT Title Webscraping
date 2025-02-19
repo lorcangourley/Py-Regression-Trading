@@ -1,4 +1,5 @@
 # Can apply TextBlob to titles
+# Link to code source unavailable
 
 import requests
 from bs4 import BeautifulSoup

@@ -1,3 +1,5 @@
+# First 1000 trades made a lost but by end was up 157% from 10k -> 25k
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt

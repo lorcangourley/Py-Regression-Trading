@@ -88,7 +88,7 @@ print(f"Initial Cash: ${initial_cash}")
 print(f"Final Portfolio Value: ${final_value:.2f}")
 print(f"Total Return: {((final_value - initial_cash) / initial_cash) * 100:.2f}%")
 
-# Plot Portfolio Growth
+# Plot Portfolio Returns
 plt.figure(figsize=(10,5))
 plt.plot(portfolio_values, label="Portfolio Value")
 plt.xlabel("Days")

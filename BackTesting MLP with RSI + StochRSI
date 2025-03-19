@@ -1,3 +1,4 @@
+# Model Results using GOOGL2019 file
 # Initial Cash: $10000
 # Final Portfolio Value: $196975.81
 # Total Return: 1869.76%
@@ -56,9 +57,9 @@ shares = 0
 portfolio_values = []
 
 # Backtesting Loop
-for i in range(60, len(data) - 1):  # Start at index 60 to ensure MAs exist
+for i in range(60, len(data) - 1):  # Start at index 60 to ensure MA is available
     train_data = data.iloc[:i]  # Use past data up to index i
-    test_data = data.iloc[i + 1]  # Next-day prediction
+    test_data = data.iloc[i + 1]  # Next day prediction
 
     # Define Training and Test Data with Additional Features
     X_train = train_data[["2MA", "5MA", "14MA", "High.Lag", "Low.Lag", "RSI", "Stoch_RSI"]]

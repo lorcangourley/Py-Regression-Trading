@@ -1,4 +1,4 @@
-# Stock Price Prediction with Market Momentum & Sentiment Indicators
+# Stock Price Prediction using Momentum indicators
 
 Currently working on this project for a university assignment, where I aim to predict long and short trades using market momentum, technical indicators, and sentiment analysis. The model leverages machine learning algorithms to analyze historical market data along with sentiment data to predict future closing prices.
 

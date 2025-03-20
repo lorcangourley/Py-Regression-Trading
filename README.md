@@ -14,7 +14,8 @@ Currently working on this project for a university assignment, where I aim to pr
 - TextBlob / VADER (For sentiment analysis)
 - Matplotlib, Seaborn (For data visualization)
 
-
+### Best Model
+My current best model used stochastic RSI, RSI & Moving Averages as features to predict the stochastic volatility of GOOGL stock prices.
 
 
 
